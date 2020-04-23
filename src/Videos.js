@@ -8,6 +8,7 @@ class Videos extends React.Component {
     this.state = {
       videos: [],
     };
+    this.videoClick = this.videoClick.bind(this);
   }
 
   componentDidMount() {
@@ -16,14 +17,28 @@ class Videos extends React.Component {
     });
   }
 
+  videoClick(event) {
+    console.log(event.target.id);
+    axios.get(`/watch/${event.target.id}`);
+    this.props.newVideo(event.target.id);
+  }
+
   render() {
-    console.log(this.state.videos);
     return (
       <React.Fragment>
-        {this.state.videos.map((video) => {
+        {this.state.videos.map((video, idx) => {
           if (video !== '.DS_Store') {
-            video = video.slice(0, video.length - 4);
-            return <body>{video.replace(/\./g, ' ')}</body>;
+            let videoDisplay = video.slice(0, video.length - 4);
+            videoDisplay = videoDisplay.replace(/\./g, ' ');
+            return (
+              <React.Fragment>
+                <br />
+                <div id={video} onClick={this.videoClick} key={idx}>
+                  {videoDisplay}
+                </div>
+                <br />
+              </React.Fragment>
+            );
           }
         })}
       </React.Fragment>
@@ -31,4 +46,4 @@ class Videos extends React.Component {
   }
 }
 
-export default hot(Videos);
+export default Videos;

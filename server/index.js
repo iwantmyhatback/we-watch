@@ -1,10 +1,14 @@
 const express = require('express');
 const path = require('path');
+const bodyParser = require('body-parser');
 const fs = require('fs');
-const listenPort = 80;
+const streamVideo = require('./streamVideo');
 
 const app = express();
-let = availableVideos = [];
+const listenPort = 80;
+let currentVideo;
+
+app.use(bodyParser.json());
 app.use('/', express.static(path.join(__dirname, '../dist')));
 
 app.get('/videos', (req, res) => {
@@ -17,35 +21,9 @@ app.get('/videos', (req, res) => {
   });
 });
 
-app.get('/watch', (req, res) => {
-  const videoPath = path.join(__dirname, '../videos/rick.and.morty.s01.e01.mp4');
-  const videoStats = fs.statSync(videoPath);
-  const videoSize = videoStats.size;
-  const range = req.headers.range;
-
-  console.log(req.headers.range);
-  if (range) {
-    const parts = range.replace(/bytes=/, '').split('-');
-    const start = parseInt(parts[0], 10);
-    const end = parts[1] ? parseInt(parts[1], 10) : videoSize - 1;
-    const chunkSize = end - start + 1;
-    const video = fs.createReadStream(videoPath, { start, end });
-    const head = {
-      'Content-Range': `bytes ${start}-${end}/${videoSize}`,
-      'Accept-Ranges': 'bytes',
-      'Content-Length': chunkSize,
-      'Content-Type': 'video/mp4',
-    };
-    res.writeHead(206, head);
-    video.pipe(res);
-  } else {
-    const head = {
-      'Content-Length': videoSize,
-      'Content-Type': 'video/mp4',
-    };
-    res.writeHead(200, head);
-    fs.createReadStream(videoPath).pipe(res);
-  }
+app.get('/watch/:currentVideo', (req, res) => {
+  console.log(req.params.currentVideo);
+  streamVideo(req, res, req.params.currentVideo);
 });
 
 app.listen(listenPort, () => {
