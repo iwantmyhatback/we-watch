@@ -6,7 +6,7 @@ const streamVideo = require('./streamVideo');
 
 const app = express();
 const listenPort = 80;
-let currentVideo;
+let currentTime = 0;
 
 app.use(bodyParser.json());
 app.use('/', express.static(path.join(__dirname, '../dist')));
@@ -22,6 +22,7 @@ app.get('/videos', (req, res) => {
 });
 
 app.get('/watch/:currentVideo', (req, res) => {
+  console.log(req);
   console.log(req.params.currentVideo);
   streamVideo(req, res, req.params.currentVideo);
 });
